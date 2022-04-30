@@ -1,8 +1,10 @@
+from typing import Tuple,List
 from models.user import User
-from sqlalchemy import select
+from sqlalchemy import select,or_,func
 from models import Session
 import pytz
 from datetime import datetime
+from passlib.context import CryptContext
 
 
 
@@ -44,4 +46,35 @@ class authRepository():
             session.commit()
             session.refresh(new_user)
         return new_user
+    
+    @staticmethod
+    def verify_password(user,plain_password):
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        with Session() as session:
+            stmt = select(User.password).where(User.username==user)
+            hashed_password = session.execute(stmt).scalar()
+        return pwd_context.verify(plain_password, hashed_password)
+
+    @staticmethod
+    def get_user(user:str)->User:
+        with Session() as session:
+            stmt = select(User).where(User.username==user)
+            user = session.execute(stmt).scalar()
+        return user
+    
+    @staticmethod
+    def get_all(limit:int=None,terms:str=None)->Tuple[List[User],int]:
+        with Session() as session:
+            stmt = select(User)\
+                .where(or_(User.name.ilike(f'%{terms}%'),User.username.ilike(f'%{terms}%'),User.email.ilike(f'%{terms}%')))\
+                .order_by(User.name.asc())\
+                .limit(limit=limit)
+            data = session.execute(stmt).scalars().all()
+
+            stmt2 = select(func.count(User.username))\
+                .where(or_(User.name.ilike(f'%{terms}%'),User.username.ilike(f'%{terms}%'),User.email.ilike(f'%{terms}%')))
+            num_data = session.execute(stmt2).scalar()
+        
+        return data,num_data
+
 
