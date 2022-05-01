@@ -1,3 +1,4 @@
+from ctypes import Union
 from typing import Tuple,List
 from models.user import User
 from sqlalchemy import select,or_,func
@@ -76,5 +77,50 @@ class authRepository():
             num_data = session.execute(stmt2).scalar()
         
         return data,num_data
+
+    @staticmethod
+    def update_user(username=str,email=str,name=str)->User:
+        with Session() as session:
+            stmt = select(User).where(User.username==username)
+            user = session.execute(stmt).scalar()
+
+            # updated data
+            user.username = username
+            user.email = email
+            user.name = name
+            session.commit()
+
+            stmt = select(User).where(User.username==username)
+            data = session.execute(stmt).scalar()
+
+        return data
+    
+    @staticmethod
+    def update_user_and_username(username=str,new_username=str,email=str,name=str)->User:
+        with Session() as session:
+            stmt = select(User).where(User.username==username)
+            user = session.execute(stmt).scalar()
+
+            # updated data
+            user.username = new_username
+            user.email = email
+            user.name = name
+            session.commit()
+
+            stmt = select(User).where(User.username==new_username)
+            data = session.execute(stmt).scalar()
+
+        return data
+    
+    @staticmethod
+    def update_password(username=str,new_password=str)->None:
+        with Session() as session:
+            stmt = select(User).where(User.username==username)
+            user = session.execute(stmt).scalar()
+
+            # updated data
+            user.password = new_password
+            session.commit()
+
 
 

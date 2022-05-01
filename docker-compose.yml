@@ -1,0 +1,12 @@
+version: "3"
+services: 
+  postgres:
+    image: postgres:12
+    ports: 
+      - "5438:5432"
+    environment: 
+      - POSTGRES_PASSWORD=12qwaszx
+  redis:
+    image: redis:5
+    ports: 
+      - "6370:6379"

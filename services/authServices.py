@@ -1,8 +1,10 @@
+from models import user
 from repository.authRepository import authRepository
 from common.responses_services import BadRequest,Created,InternalServerError, Ok
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm
 from common.security import generate_jwt_token_from_user
+from schemas.authSchemas import changePasswordRequest, updateRequestUser
 from settings import JWT_PREFIX
 from models.user import User
 
@@ -21,6 +23,46 @@ class AuthServices:
 
             }for item in data]
         })
+    
+    @staticmethod
+    async def get_detail(requestUser:User,username:str):
+        data = authRepository.get_user(user=username)
+        if data == None:
+            return BadRequest(message='user not found')
+        return Ok(data={
+                'username':data.username,
+                'name':data.name,
+                'email':data.email
+        })
+    
+    @staticmethod
+    async def update_user(requestUser:User,request:updateRequestUser):
+        if requestUser.username == request.username:
+            username = requestUser.username
+            data = authRepository.update_user(username=username,email=request.email,name=request.name)
+            return Ok(data={
+                'username':data.username,
+                'name':data.name,
+                'email':data.email
+        })
+        else:
+            new_username = request.username
+            data = authRepository.update_user_and_username(username=requestUser.username,new_username=new_username,email=request.email,name=request.name)
+            return Ok(data={
+                'username':data.username,
+                'name':data.name,
+                'email':data.email
+                })
+    
+    @staticmethod
+    async def update_password(requestUser:User,request:changePasswordRequest):
+        #hashed password
+        pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+        password_hashed = pwd_context.hash(request.new_password)
+
+        authRepository.update_password(username=requestUser.username,new_password=password_hashed)
+
+        return Ok(data={'message':'succes'})
     
     @staticmethod
     async def sign_up(request):

@@ -12,10 +12,35 @@ class signUpResponse(BaseModel):
     password:str
 
 class getAllResponsesItems(BaseModel):
-    username = str
-    name = str
-    email = str
+    username : str
+    name : str
+    email : str
 
 class getAllResponses(BaseModel):
+
     count:int
     results:List[getAllResponsesItems]
+
+class getDetailResponsesItems(BaseModel):
+
+    username : str
+    name : str
+    email : str
+
+class updateRequestUser(BaseModel):
+
+    username : str
+    name : str
+    email : str
+
+class updateRequestResponse(BaseModel):
+
+    username : str
+    name : str
+    email : str
+
+class changePasswordResponse(BaseModel):
+    message : str
+
+class changePasswordRequest(BaseModel):
+    new_password : str
