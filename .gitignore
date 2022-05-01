@@ -3,4 +3,4 @@ pypyenv/
 **__pycache__**
 alembic.ini
 .env
-migrations/versions/
+versions/
