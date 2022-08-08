@@ -1,4 +1,3 @@
-from models import user
 from repository.authRepository import authRepository
 from common.responses_services import BadRequest,Created,InternalServerError, Ok
 from passlib.context import CryptContext
@@ -37,6 +36,7 @@ class AuthServices:
     
     @staticmethod
     async def update_user(requestUser:User,request:updateRequestUser):
+        # setelah user mengganti datanya agar data tersebut tidak menyangkut di session maka hrus ada redirect logout
         if requestUser.username == request.username:
             username = requestUser.username
             data = authRepository.update_user(username=username,email=request.email,name=request.name)
@@ -114,5 +114,12 @@ class AuthServices:
             return Ok(data={"access_token": jwt_token, "token_type": JWT_PREFIX})
         except Exception as e:
             return InternalServerError(error=str(e))
-
+    
+    @staticmethod
+    async def delete_user(requestUser:User,username:str):
+        try:
+            authRepository.soft_delete_user(username=username)
+            return Ok(data={'message':f'{username} has been deleted'})
+        except Exception as e:
+            return InternalServerError(error=str(e))
 

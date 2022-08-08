@@ -37,7 +37,7 @@ async def get_detail(username=str,token: str = Depends(oauth2_scheme)):
     '403': {'model': Forbidden},
     '500': {'model': InternalServerError},
 })
-async def update_password(request:changePasswordRequest,token: str = Depends(oauth2_scheme)):
+async def update_password(request:updateRequestUser,token: str = Depends(oauth2_scheme)):
     user = get_user_from_jwt_token(token)
     result = await AuthServices.update_user(requestUser=user,request=request)
     return common_response(result)
@@ -67,4 +67,14 @@ async def sign_up(request: signUpRequest):
 })
 async def generate_token(form_data: OAuth2PasswordRequestForm = Depends()):
     result = await AuthServices.generate_token(form_data)
+    return common_response(result)
+
+@router.delete('/delete-user/{username}',responses={
+    '200': {'message':'name has been deleted'},
+    '403': {'model': Forbidden},
+    '500': {'model': InternalServerError},
+})
+async def delete_user(username:str,token: str = Depends(oauth2_scheme)):
+    user = get_user_from_jwt_token(token)
+    result = await AuthServices.delete_user(requestUser=user,username=username)
     return common_response(result)
